@@ -3,27 +3,34 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     userFirstName = db.Column(db.String(45), nullable=False)
     userLastName = db.Column(db.String(45), nullable=False)
     userName = db.Column(db.String(45), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(45), nullable=False)
+    addresses = db.relationship('Address', backref='person', lazy=True)
+
 
     def __repr__(self):
         return '<Person %r>' % self.userName
 
     def serialize(self):
         return {
-            "user id" : self.id,
+            "user id": self.id,
             "userFirstName": self.userFirstName,
             "userLastName": self.userLastName,
             "userName": self.userName,
             "email": self.email,
-            "password": self.password
+            "password": self.password,
+            "addresses": self.addresses
         }
 
 class Product(db.Model):
+    __tablename__ = 'products'
+
     id = db.Column(db.Integer, primary_key=True)
     productName = db.Column(db.String(45), unique=True, nullable=False)
     productDescription = db.Column(db.String(255), unique=True, nullable=True)
@@ -45,13 +52,16 @@ class Product(db.Model):
         }
 
 class Address(db.Model):
+    __tablename__ = 'addresses'
+
     id = db.Column(db.Integer, primary_key=True)
     userStreet = db.Column(db.String(45), nullable=False)
     userNumber = db.Column(db.String(45), nullable=False)
     userCity = db.Column(db.String(45), nullable=False)
     userState = db.Column(db.String(45), nullable=False)
     userZipCode = db.Column(db.String(12), nullable=False)
-
+    person_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
 
 
     def __repr__(self):
@@ -59,15 +69,18 @@ class Address(db.Model):
 
     def serialize(self):
         return {
+            "street id": self.id,
             "User Street": self.userStreet,
             "User Number": self.userNumber,
             "User City": self.userCity,
             "User State": self.userState,
             "User Zip Code": self.userZipCode,
-
+            "user": self.person_id
         }
 
 class BillingAddress(db.Model):
+    __tablename__ = 'billing_addresses'
+
     id = db.Column(db.Integer, primary_key=True)
     billingStreet = db.Column(db.String(45), nullable=True)
     billingNumber = db.Column(db.String(45), nullable=True)
@@ -89,6 +102,7 @@ class BillingAddress(db.Model):
         }
 
 class Picture(db.Model):
+    __tablename__ = 'pictures'
     id = db.Column(db.Integer, primary_key=True)
     picture_url = db.Column(db.Text, nullable=False)
 

@@ -46,7 +46,7 @@ def handle_person():
         if 'password' not in body:
             raise APIException('You need to enter your password', status_code=400)
 
-        user1 = User(userFirstName=body['userFirstName'], userLastName=body['userLastName'], userName=body['userName'], email=body['email'], password=body['password'])
+        user1 = User(userFirstName=body['userFirstName'], userLastName=body['userLastName'], userName=body['userName'], email=body['email'], password=body['password'], addresses=body['addresses'])
         db.session.add(user1)
         db.session.commit()
         return "ok", 200
@@ -201,7 +201,7 @@ def handle_address():
         if 'userZipCode' not in body:
             raise APIException('You need to specify the Zip Code', status_code=400)
 
-        address1 = Address(userStreet=body['userStreet'], userNumber=body['userNumber'], userCity=body['userCity'], userState=body['userState'], userZipCode=body['userZipCode'])
+        address1 = Address(userStreet=body['userStreet'], userNumber=body['userNumber'], userCity=body['userCity'], userState=body['userState'], userZipCode=body['userZipCode'], person_id=body['person_id'])
         db.session.add(address1)
         db.session.commit()
         return "ok", 200
