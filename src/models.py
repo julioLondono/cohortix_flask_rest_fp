@@ -18,6 +18,13 @@ class User(db.Model):
         return '<Person %r>' % self.userName
 
     def serialize(self):
+        # need to create a dictionary (array) to be able to serialize by looping into an array
+        addresses = []
+        for i in self.addresses:
+            # to display just the id uncomment the following line
+            # addresses.append(i.id)
+            #to display the entire object data
+            addresses.append(i.serialize())
         return {
             "user id": self.id,
             "userFirstName": self.userFirstName,
@@ -25,7 +32,7 @@ class User(db.Model):
             "userName": self.userName,
             "email": self.email,
             "password": self.password,
-            "addresses": self.addresses
+            "addresses": addresses  #call the empty array that was looped before the return
         }
 
 class Product(db.Model):
