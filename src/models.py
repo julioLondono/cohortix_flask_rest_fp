@@ -12,7 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(45), nullable=False)
     addresses = db.relationship('Address', backref='person', lazy=True)
-
+    bill_address = db.relationship('BillingAddress', backref='person', lazy=True)
 
     def __repr__(self):
         return '<Person %r>' % self.userName
@@ -25,6 +25,9 @@ class User(db.Model):
             # addresses.append(i.id)
             #to display the entire object data
             addresses.append(i.serialize())
+        billAddress = []
+        for j in self.bill_address:
+            billAddress.append(j.serialize())
         return {
             "user id": self.id,
             "userFirstName": self.userFirstName,
@@ -32,7 +35,8 @@ class User(db.Model):
             "userName": self.userName,
             "email": self.email,
             "password": self.password,
-            "addresses": addresses  #call the empty array that was looped before the return
+            "addresses": addresses,  #call the empty array that was looped before the return
+            "Bill Address": billAddress
         }
 
 class Product(db.Model):
@@ -44,18 +48,23 @@ class Product(db.Model):
     productPrice = db.Column(db.String(45), unique=False, nullable=False)
     productCategory = db.Column(db.String(45), unique=False, nullable=True)
     productAgeRange = db.Column(db.String(45), unique=False, nullable=True)
+    pictureUrl = db.relationship('Picture', backref='photos', lazy=True)
 
     def __repr__(self):
         return '<Product %r>' % self.productName
 
     def serialize(self):
+        photo = []
+        for i in self.pictureUrl:
+            photo.append(i.serialize())
         return {
             "Product id": self.id,
             "ProductName": self.productName,
             "productDescription": self.productDescription,
             "productPrice": self.productPrice,
             "productCategory": self.productCategory,
-            "productAgeRange": self.productAgeRange
+            "productAgeRange": self.productAgeRange,
+            "photo": photo
         }
 
 class Address(db.Model):
@@ -67,6 +76,7 @@ class Address(db.Model):
     userCity = db.Column(db.String(45), nullable=False)
     userState = db.Column(db.String(45), nullable=False)
     userZipCode = db.Column(db.String(12), nullable=False)
+    isBillingAddress=db.Column(db.Boolean)
     person_id = db.Column(db.Integer, db.ForeignKey('users.id'),
         nullable=False)
 
@@ -82,6 +92,7 @@ class Address(db.Model):
             "User City": self.userCity,
             "User State": self.userState,
             "User Zip Code": self.userZipCode,
+            "Same as Billing Address": self.isBillingAddress,
             "user": self.person_id
         }
 
@@ -94,6 +105,8 @@ class BillingAddress(db.Model):
     billingCity = db.Column(db.String(45), nullable=True)
     billingState = db.Column(db.String(45), nullable=True)
     billingZipCode = db.Column(db.String(12), nullable=True)
+    person_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
 
     def __repr__(self):
         return '<BillingAddress %r>' % self.billingStreet
@@ -105,19 +118,22 @@ class BillingAddress(db.Model):
             "Billing City": self.billingCity,
             "Billing State": self.billingState,
             "Billing Zip Code": self.billingZipCode,
+            "user": self.person_id
 
         }
 
 class Picture(db.Model):
     __tablename__ = 'pictures'
+
     id = db.Column(db.Integer, primary_key=True)
     picture_url = db.Column(db.Text, nullable=False)
-
+    productId = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
 
     def __repr__(self):
         return '<Picture %r>' % self.picture_url
 
     def serialize(self):
         return {
-            "Picture URL": self.picture_url
+            "Picture URL": self.picture_url,
+            "product Id": self.productId
         }

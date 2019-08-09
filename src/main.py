@@ -201,7 +201,7 @@ def handle_address():
         if 'userZipCode' not in body:
             raise APIException('You need to specify the Zip Code', status_code=400)
 
-        address1 = Address(userStreet=body['userStreet'], userNumber=body['userNumber'], userCity=body['userCity'], userState=body['userState'], userZipCode=body['userZipCode'], person_id=body['person_id'])
+        address1 = Address(userStreet=body['userStreet'], userNumber=body['userNumber'], userCity=body['userCity'], userState=body['userState'], userZipCode=body['userZipCode'], isBillingAddress=body['isBillingAddress'], person_id=body['person_id'])
         db.session.add(address1)
         db.session.commit()
         return "ok", 200
@@ -287,7 +287,7 @@ def handle_billingaddress():
         if 'billingZipCode' not in body:
             raise APIException('You need to specify the billing Zip Code', status_code=400)
 
-        address1 = BillingAddress(billingStreet=body['billingStreet'], billingNumber=body['billingNumber'], billingCity=body['billingCity'],  billingState=body['billingState'], billingZipCode=body['billingZipCode'])
+        address1 = BillingAddress(billingStreet=body['billingStreet'], billingNumber=body['billingNumber'], billingCity=body['billingCity'],  billingState=body['billingState'], billingZipCode=body['billingZipCode'], person_id=body['person_id'])
         db.session.add(address1)
         db.session.commit()
         return "ok", 200
@@ -365,7 +365,7 @@ def handle_picture():
         if 'picture_url' not in body:
             raise APIException('You need to specify the picture URL', status_code=400)
 
-        address1 = Picture(picture_url=body['picture_url'])
+        address1 = Picture(picture_url=body['picture_url'], product_id=body['product_id'])
         db.session.add(address1)
         db.session.commit()
         return "ok", 200
@@ -382,7 +382,7 @@ def handle_picture():
 @app.route('/picture/<int:picture_id>', methods=['PUT', 'GET', 'DELETE'])
 def get_single_picture(picture_id):
     """
-    Single billing address
+    Single picture
     """
 
     # PUT request
