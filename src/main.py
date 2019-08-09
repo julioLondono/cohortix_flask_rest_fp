@@ -9,6 +9,10 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from models import db, User, Product, Address, BillingAddress, Picture
 
+from flask_jwt_simple import (
+    JWTManager, jwt_required, create_jwt, get_jwt_identity
+)
+
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
@@ -16,6 +20,36 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
+
+# Setup the Flask-JWT-Simple extension
+app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+jwt = JWTManager(app)
+
+
+# Provide a method to create access tokens. The create_jwt()
+# function is used to actually generate the token
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    params = request.get_json()
+    userName = params.get('userName', None)
+    email = params.get('email', None)
+
+    if not userName:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not email:
+        return jsonify({"msg": "Missing password parameter"}), 400
+    usercheck = User.query.filter_by(userName=userName, email=email).first()
+    if usercheck == None:
+        return jsonify({"msg": "Bad username or email"}), 401
+    # if username != 'test' or password != 'test':
+    #     return jsonify({"msg": "Bad username or password"}), 401
+
+    # Identity can be any data that is json serializable
+    ret = {'jwt': create_jwt(identity=userName)}
+    return jsonify(ret), 200
 
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -61,6 +95,7 @@ def handle_person():
 
 
 @app.route('/user/<int:person_id>', methods=['PUT', 'GET', 'DELETE'])
+@jwt_required
 def get_single_person(person_id):
     """
     Single person
@@ -365,7 +400,7 @@ def handle_picture():
         if 'picture_url' not in body:
             raise APIException('You need to specify the picture URL', status_code=400)
 
-        address1 = Picture(picture_url=body['picture_url'], product_id=body['product_id'])
+        address1 = Picture(picture_url=body['picture_url'], photos_id=body['photos_id'])
         db.session.add(address1)
         db.session.commit()
         return "ok", 200
@@ -416,6 +451,74 @@ def get_single_picture(picture_id):
         return "ok", 200
 
     return "Invalid Method", 404
+
+# ////////////////////////////////////////////shoping Cart End Point ////////////////////////////////
+# @app.route('/picture', methods=['POST', 'GET'])
+# def handle_picture():
+#     """
+#     Create picture URL and retrieve all pictures
+#     """
+
+#     # POST request
+#     if request.method == 'POST':
+#         body = request.get_json()
+
+#         if body is None:
+#             raise APIException("You need to specify the request body as a json object", status_code=400)
+#         if 'picture_url' not in body:
+#             raise APIException('You need to specify the picture URL', status_code=400)
+
+#         address1 = Picture(picture_url=body['picture_url'], photos_id=body['photos_id'])
+#         db.session.add(address1)
+#         db.session.commit()
+#         return "ok", 200
+
+#     # GET request
+#     if request.method == 'GET':
+#         all_pictures = Picture.query.all()
+#         all_pictures = list(map(lambda x: x.serialize(), all_pictures))
+#         return jsonify(all_pictures), 200
+
+#     return "Invalid Method", 404
+
+
+# @app.route('/picture/<int:picture_id>', methods=['PUT', 'GET', 'DELETE'])
+# def get_single_picture(picture_id):
+#     """
+#     Single picture
+#     """
+
+#     # PUT request
+#     if request.method == 'PUT':
+#         body = request.get_json()
+#         if body is None:
+#             raise APIException("You need to specify the request body as a json object", status_code=400)
+
+#         address1 = BillingAddress.query.get(picture_id)
+#         if address1 is None:
+#             raise APIException('picture not found', status_code=404)
+
+#         db.session.commit()
+
+#         return jsonify(address1.serialize()), 200
+
+#     # GET request
+#     if request.method == 'GET':
+#         address1 = BillingAddress.query.get(picture_id)
+#         if address1 is None:
+#             raise APIException('picture not found', status_code=404)
+#         return jsonify(address1.serialize()), 200
+
+#     # DELETE request
+#     if request.method == 'DELETE':
+#         address1 = Picture.query.get(picture_id)
+#         if address1 is None:
+#             raise APIException('picture not found', status_code=404)
+#         db.session.delete(address1)
+#         db.session.commit()
+#         return "ok", 200
+
+#     return "Invalid Method", 404
 
 
 

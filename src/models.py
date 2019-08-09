@@ -2,6 +2,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+shoping_cart = db.Table('shoping_cart',
+    db.Column('users_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('products_id', db.Integer, db.ForeignKey('products.id'), primary_key=True)
+)
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -13,6 +18,7 @@ class User(db.Model):
     password = db.Column(db.String(45), nullable=False)
     addresses = db.relationship('Address', backref='person', lazy=True)
     bill_address = db.relationship('BillingAddress', backref='person', lazy=True)
+    shoping_cart = db.relationship('Product', secondary=shoping_cart, lazy='subquery', backref=db.backref('products', lazy=True))
 
     def __repr__(self):
         return '<Person %r>' % self.userName
@@ -49,6 +55,7 @@ class Product(db.Model):
     productCategory = db.Column(db.String(45), unique=False, nullable=True)
     productAgeRange = db.Column(db.String(45), unique=False, nullable=True)
     pictureUrl = db.relationship('Picture', backref='photos', lazy=True)
+    # bill_address = db.relationship('BillingAddress', backref='person', lazy=True)
 
     def __repr__(self):
         return '<Product %r>' % self.productName
@@ -127,13 +134,14 @@ class Picture(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     picture_url = db.Column(db.Text, nullable=False)
-    productId = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-
+    photos_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    # person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     def __repr__(self):
         return '<Picture %r>' % self.picture_url
 
     def serialize(self):
         return {
             "Picture URL": self.picture_url,
-            "product Id": self.productId
+            "product Id": self.photos_id
         }
+
