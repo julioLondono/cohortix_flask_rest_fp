@@ -32,6 +32,6 @@ def generate_sitemap(app):
     links_html = "".join(["<li>" + y + "</li>" for y in links])
     return """
         <div style="text-align: center;">
-        <img src='https://assets.breatheco.de/apis/img/4geeks/rigo-baby.jpg' />
-        <h1>Hello Rigo!!</h1>
+        <img src='https://images.pexels.com/photos/1020324/pexels-photo-1020324.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' />
+        <h1>CohortIX-FP-BackEnd</h1>
         This is your api home, remember to specify a real endpoint path like: <ul style="text-align: left;">"""+links_html+"</ul></div>"
