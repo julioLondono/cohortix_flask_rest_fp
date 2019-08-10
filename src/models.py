@@ -2,11 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-shoping_cart = db.Table('shoping_cart',
-    db.Column('users_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
-    db.Column('products_id', db.Integer, db.ForeignKey('products.id'), primary_key=True)
-)
-
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -18,8 +13,7 @@ class User(db.Model):
     password = db.Column(db.String(45), nullable=False)
     addresses = db.relationship('Address', backref='person', lazy=True)
     bill_address = db.relationship('BillingAddress', backref='person', lazy=True)
-    shoping_cart = db.relationship('Product', secondary=shoping_cart, lazy='subquery', backref=db.backref('products', lazy=True))
-
+    
     def __repr__(self):
         return '<Person %r>' % self.userName
 
@@ -34,6 +28,7 @@ class User(db.Model):
         billAddress = []
         for j in self.bill_address:
             billAddress.append(j.serialize())
+        
         return {
             "user id": self.id,
             "userFirstName": self.userFirstName,

@@ -21,6 +21,7 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 
+# /////////////////////////////////////// JWT configuration///////////////////////////////////////
 # Setup the Flask-JWT-Simple extension
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
 jwt = JWTManager(app)
@@ -95,7 +96,7 @@ def handle_person():
 
 
 @app.route('/user/<int:person_id>', methods=['PUT', 'GET', 'DELETE'])
-@jwt_required
+@jwt_required #this decorator makes this requires to be logged in
 def get_single_person(person_id):
     """
     Single person
@@ -384,7 +385,7 @@ def get_single_billingaddress(billingaddress_id):
 
     return "Invalid Method", 404
 
-# ////////////////////////////////////////////Picture End Point ////////////////////////////////
+# //////////////////////////////////////////// Picture End Point ////////////////////////////////
 @app.route('/picture', methods=['POST', 'GET'])
 def handle_picture():
     """
@@ -452,76 +453,7 @@ def get_single_picture(picture_id):
 
     return "Invalid Method", 404
 
-# ////////////////////////////////////////////shoping Cart End Point ////////////////////////////////
-# @app.route('/picture', methods=['POST', 'GET'])
-# def handle_picture():
-#     """
-#     Create picture URL and retrieve all pictures
-#     """
-
-#     # POST request
-#     if request.method == 'POST':
-#         body = request.get_json()
-
-#         if body is None:
-#             raise APIException("You need to specify the request body as a json object", status_code=400)
-#         if 'picture_url' not in body:
-#             raise APIException('You need to specify the picture URL', status_code=400)
-
-#         address1 = Picture(picture_url=body['picture_url'], photos_id=body['photos_id'])
-#         db.session.add(address1)
-#         db.session.commit()
-#         return "ok", 200
-
-#     # GET request
-#     if request.method == 'GET':
-#         all_pictures = Picture.query.all()
-#         all_pictures = list(map(lambda x: x.serialize(), all_pictures))
-#         return jsonify(all_pictures), 200
-
-#     return "Invalid Method", 404
-
-
-# @app.route('/picture/<int:picture_id>', methods=['PUT', 'GET', 'DELETE'])
-# def get_single_picture(picture_id):
-#     """
-#     Single picture
-#     """
-
-#     # PUT request
-#     if request.method == 'PUT':
-#         body = request.get_json()
-#         if body is None:
-#             raise APIException("You need to specify the request body as a json object", status_code=400)
-
-#         address1 = BillingAddress.query.get(picture_id)
-#         if address1 is None:
-#             raise APIException('picture not found', status_code=404)
-
-#         db.session.commit()
-
-#         return jsonify(address1.serialize()), 200
-
-#     # GET request
-#     if request.method == 'GET':
-#         address1 = BillingAddress.query.get(picture_id)
-#         if address1 is None:
-#             raise APIException('picture not found', status_code=404)
-#         return jsonify(address1.serialize()), 200
-
-#     # DELETE request
-#     if request.method == 'DELETE':
-#         address1 = Picture.query.get(picture_id)
-#         if address1 is None:
-#             raise APIException('picture not found', status_code=404)
-#         db.session.delete(address1)
-#         db.session.commit()
-#         return "ok", 200
-
-#     return "Invalid Method", 404
-
-
-
+# /////////////////////////////////////// Start Server //////////////////////////////
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT)
